@@ -1,0 +1,65 @@
+﻿@model Vidly.ViewModels.MovieFormViewModel
+@{
+    ViewBag.Title = "MovieForm";
+}
+
+<h2>@Model.Title</h2>
+
+@using (Html.BeginForm("Save", "Movies"))
+{
+    
+    @Html.ValidationSummary(true, "Please Fill all the Required Fields")
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name)
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Name)
+    </div>
+
+    <div class="form-group">
+        <label for="ReleaseDate">Release Date</label>
+        @Html.TextBoxFor(m => m.ReleaseDate, "{0:d MMM yyyy}", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.ReleaseDate)
+    </div>
+
+    <div class="form-group">
+        <label for="ReleaseDate">DateAdded</label>
+        @Html.TextBoxFor(m => m.DateAdded, "{0:d MMM yyyy}", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.DateAdded)
+    </div>
+
+    <div class="form-group">
+        <label for="GenreId">Genre</label>
+        @* new selectList is second argument and in it model,membershiptypes is first argument
+            which display list of items and second is property which holds values in our case is id
+             and third is the property which display on the list   *@
+        @Html.DropDownListFor(m => m.GenreId, new SelectList(Model.genres, "Id", "Name"), "Select Genre", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.GenreId)
+    </div>
+
+    <div class="form-group">
+        <label for="NumberInStock">Number In Stock</label>
+        @Html.TextBoxFor(m => m.NumberInStock, new { @class = "form-control" })
+    </div>
+
+
+    @Html.HiddenFor(m => m.Id)
+
+    @*Anti-forgery Tokens it helps to save data from CSRF (Cross-site Request Forgery) Attack from the hackers
+        by this attach hacker will able to access in the form cookies and get all the data and they can edit or delete anything or they can miss use the data too
+        but if we use Anti-forgery method it will hide the data, by chance hacker able to get cookies but they will never able to open and see data from
+        Hidden fields by Anti-forgery method, we just need to apply this method in action and in contoller method where we wanna use .NET automatically
+        Handle this *@
+    @Html.AntiForgeryToken()
+
+    <button type="submit" class="btn btn-primary">Save</button>
+
+}
+
+@*This Enabled Client Side validation, if you want to check it works start application and then open 
+    developer tool and go to network tab and then refresh page and then hit save button if network tab is still null it means it is working 
+    it does not send any request to database until user fill data in the fields properly*@
+@section scripts{
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
