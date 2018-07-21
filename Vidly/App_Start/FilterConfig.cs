@@ -10,6 +10,8 @@ namespace Vidly
             filters.Add(new HandleErrorAttribute());
             //this one i write down which allows authrization for login admin vs user
             filters.Add(new AuthorizeAttribute());
+
+            //filters.Add(new RequireHttpsAttribute());
         }
     }
 }
