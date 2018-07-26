@@ -1,0 +1,138 @@
+﻿@model dynamic
+@{
+    ViewBag.Title = "New Rental Form";
+}
+
+<h2>New Rental Form</h2>
+
+@* @Ajax.BeginForm()*@
+
+<form id="newRental">
+
+    @*for ZenCoding we have to install web essentails first in tools extention and update and online then just write div.form-group>label+input[type='text'].form-control and press tab
+    another  ul#movies.list-group*@
+
+    <div class="form-group">
+        <label>Customer</label>
+        <div class="tt-container">
+            <input id="customer" name="customer" required type="text" data-rule-validCustomer="true" value="" class="form-control" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Movie</label>
+        <div class="tt-container">
+            <input id="movie" name="movie" type="text" data-rule-validMovie="true" value="" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-4">
+            <ul id="movies" class="list-group"></ul>
+        </div>
+    </div>
+
+    <button class="btn btn-primary">Submit</button>
+</form>
+
+@section scripts 
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+    <script>
+        $(document).ready(function () {
+
+            var vm = {
+                movieIds: []
+            };
+
+            var customers = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: '/api/customer?query=%QUERY',
+                    wildcard: '%QUERY'
+                }
+            });
+
+            $('#customer').typeahead({
+                minLength: 1,
+                highlight: true
+            }, {
+                name: 'customer',
+                display: 'name',
+                source: customers
+            }).on("typeahead:select", function (e, customer) {
+                vm.customerId = customer.id;
+            });
+
+            /*For movie Box*/
+            var movies = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: '/api/movie?query=%QUERY',
+                    wildcard: '%QUERY'
+                }
+            });
+
+            $('#movie').typeahead({
+                minLength: 1,
+                highlight: true
+            }, {
+                name: 'movies',
+                display: 'name',
+                source: movies
+
+            }).on("typeahead:select", function (e, movie) {
+                $("#movies").append("<li class='list-group-item'>" + movie.name + "</li>");
+
+                $("#movie").typeahead("val", "");
+
+                vm.movieIds.push(movie.id);
+            });
+            
+
+            //this three lines is custom validator for customer input
+            $.validator.addMethod("validCustomer", function () {
+                return vm.customerId && vm.customerId !== 0;
+            }, "Please Select a Valid Customer");
+
+            //this three lines is custom validator for Movie input
+            $.validator.addMethod("validMovie", function () {
+                return vm.movieIds.length > 0;
+            }, "Please Select at least one Movie First");
+
+
+
+           var validator = $("#newRental").validate({
+                submitHandler: function () {
+                    $.ajax({
+                        url: "/api/newRentals",
+                        method: "post",
+                        data: vm
+                    })
+                    .done(function () {
+                        toastr.success("Rental Successfully Recorded.");
+                        //this three lines clear the form once it successfully Submitted
+                        $("#customer").typeahead("val", "");
+                        $("#movie").typeahead("val", "");
+                        $("#movies").empty();
+
+                        vm = { movieIds: [] };
+
+                        validator.resetForm();
+                    })
+
+                    .fail(function () {
+                        toastr.error("Something Unexpected Happended");
+                    });
+                    return false;
+                }
+            });
+
+        });
+
+    </script>
+}

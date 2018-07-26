@@ -23,11 +23,21 @@ namespace Vidly.Controllers.API
 
         //return list of customer
         //GET : /api/customer
-       public IEnumerable<CustomerDto> GetCustomers()
+       public  IHttpActionResult/*IEnumerable<CustomerDto>*/ GetCustomers(/*this is after adding filter javascript in rental page */ string query = null)
         {
             //return _context.Customers.ToList();
-            return _context.Customers.Include(c => c.MembershipType).ToList().Select(Mapper.Map<Customer, CustomerDto>);
-           
+
+            //this one is before Rental javascript query
+            //return _context.Customers.Include(c => c.MembershipType).ToList().Select(Mapper.Map<Customer, CustomerDto>);
+
+            var customersQuery = _context.Customers.Include(c => c.MembershipType);
+
+            if (!string.IsNullOrWhiteSpace(query))
+                customersQuery = customersQuery.Where(c => c.Name.Contains(query));
+
+            var customerDtos = customersQuery.ToList().Select(Mapper.Map<Customer, CustomerDto>);
+
+            return Ok(customerDtos);
         }
 
 
