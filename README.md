@@ -1,2 +1,2 @@
-# DMIT2018 Notes
-Intermediate Application Development Notes
+for username type pselhi1@gmail.com
+password Pilot@0603
