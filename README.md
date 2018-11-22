@@ -1,2 +1,2 @@
-for username type pselhi@gmail.com
+for username type guest@vidly.com
 password Pilot@0603
